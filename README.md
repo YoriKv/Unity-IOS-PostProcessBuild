@@ -22,5 +22,7 @@ For Append instead of Replace when building the XCode project from Unity3D. Repl
 ==========================
 
 Special Thanks:
+
 AsherVo - https://twitter.com/AsherVo - For making his own build/postprocess script public giving me lots of ideas, base code, and the inspiration to go hunting for other ways to make things work.
+
 Akisute - http://akisute.com - For the original ruby post process script that gave me some ideas and through which I found out about the xcodeproj ruby gem. (https://gist.github.com/akisute/3780235)
