@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
+require 'rubygems'
 require 'xcodeproj'
-require 'pathname'
 
 # Make sure build path was provided
 unless ARGV[0]
