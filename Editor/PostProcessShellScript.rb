@@ -11,7 +11,6 @@ end
 # Get build directory path
 #
 build_path = ARGV[0]
-puts "PostprocessBuildPlayer running on build directory: " + build_path
 
 #
 # Get project file
@@ -36,3 +35,6 @@ proj.save(projpath)
 # Build
 Dir.chdir build_path
 system("xcodebuild")
+
+# Deploy
+system("ios-deploy -I -d -b build/" + ARGV[1] + ".app")
