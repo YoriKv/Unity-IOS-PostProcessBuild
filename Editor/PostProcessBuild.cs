@@ -11,33 +11,36 @@ public class PostProcessBuild {
 		string currentBuildLocation = EditorUserBuildSettings.GetBuildLocation(currentBuildTarget);
 
 		// Only IOS
-		if(currentBuildTarget != BuildTarget.iPhone) return;
+		if(currentBuildTarget != BuildTarget.iPhone)
+			return;
 
 		// Store scene list
 		string[] sceneNames = GetSceneList();
 
 		// Perform build
 		BuildPipeline.BuildPlayer(sceneNames, currentBuildLocation, currentBuildTarget, BuildOptions.None);
+
+		// OnPostProcessBuild will automatically run here
 	}
 
 	[MenuItem( "Utils/Test Build PostProcess")]
 	public static void TestPostProcess() {
-		OnPostprocessBuild(EditorUserBuildSettings.activeBuildTarget, EditorUserBuildSettings.GetBuildLocation(EditorUserBuildSettings.activeBuildTarget));
+		OnPostProcessBuild(EditorUserBuildSettings.activeBuildTarget, EditorUserBuildSettings.GetBuildLocation(EditorUserBuildSettings.activeBuildTarget));
 	}
 
 	[PostProcessBuild]
-	public static void OnPostprocessBuild(BuildTarget target, string pathToBuiltProject) {
+	public static void OnPostProcessBuild(BuildTarget target, string pathToBuiltProject) {
 		// Only iPhone build post processing for now
-		if(target != BuildTarget.iPhone) return;
-
-		// Run post process build script
-		string scriptPath = Application.dataPath + "/Editor/PostProcessShellScript.rb";
-		RunInShell("ruby", "\"" + scriptPath + "\" \"" + pathToBuiltProject + "\"");
-		// Deply onto device, don't wait to exit
+		if(target != BuildTarget.iPhone)
+			return;
+		
 		string[] bundleID = PlayerSettings.iPhoneBundleIdentifier.Split('.');
-		RunInShell("ios-deploy", "-I -d -b \"" + pathToBuiltProject + "/build/" + bundleID[bundleID.Length - 1] + ".app\"", false);
-	}
 
+		// Run post process shell script, this script will modify and build the project and deploy it
+		string scriptPath = Application.dataPath + "/Editor/PostProcessShellScript.rb";
+		RunInShell("ruby", "\"" + scriptPath + "\" \"" + pathToBuiltProject + "\"" + " " + bundleID[bundleID.Length - 1], false);
+	}
+	
 	// Utility function returns a list of scenes, used by BuildPipeLine
 	static string[] GetSceneList() {
 		EditorBuildSettingsScene[] scenes = EditorBuildSettings.scenes;
@@ -56,16 +59,7 @@ public class PostProcessBuild {
 		ppScriptProcess.StartInfo.FileName = file;
 		ppScriptProcess.StartInfo.Arguments = args;
 		ppScriptProcess.StartInfo.UseShellExecute = false;
-		ppScriptProcess.StartInfo.RedirectStandardError = waitForExit;
 		ppScriptProcess.StartInfo.CreateNoWindow = true;
 		ppScriptProcess.Start();
-
-		// If we want to not wait, have to ignore error output
-		if(waitForExit) {
-			while(! ppScriptProcess.StandardError.EndOfStream) {
-				Debug.Log("ERROR: " + ppScriptProcess.StandardError.ReadLine());
-			}
-			ppScriptProcess.WaitForExit();
-		}
 	}
 }
